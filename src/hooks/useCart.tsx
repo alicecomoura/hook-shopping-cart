@@ -1,8 +1,7 @@
-import { createContext, ReactNode, useContext, useRef, useState } from 'react';
-import { useEffect } from 'react-router/node_modules/@types/react';
+import { createContext, ReactNode, useContext, useRef, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { api } from '../services/api';
-import { Product } from '../types';
+import { Product, Stock } from '../types';
 
 interface CartProviderProps {
   children: ReactNode;
@@ -50,7 +49,7 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   // na segunda passa, o valor da esquerda nao é mais falso ou undefined
   // e dessa forma pode-se usar a condição
 
-  const cartPreviousValue = prevCartRef.current ?? cart
+  const cartPreviousValue = prevCartRef.current ?? cart;
 
   useEffect(() => {
     // se cartPreviousValue for diferente de cart significa que teve uma alteração no carrinho
