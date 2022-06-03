@@ -1,7 +1,8 @@
-import { createContext, ReactNode, useContext, useState } from 'react';
+import { createContext, ReactNode, useContext, useRef, useState } from 'react';
+import { useEffect } from 'react-router/node_modules/@types/react';
 import { toast } from 'react-toastify';
 import { api } from '../services/api';
-import { Product, Stock } from '../types';
+import { Product } from '../types';
 
 interface CartProviderProps {
   children: ReactNode;
@@ -31,6 +32,33 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
     return [];
   });
+
+  const prevCartRef = useRef<Product[]>();
+
+  // toda vez que aplicação for renderizada o current vai receber do cart provider
+  useEffect(() => {
+    prevCartRef.current = cart;
+  })
+
+  // se ele existir, pois pode ser um product ou undefined
+  // como ele começa undefined, a aplicação atualizaria toda vez,
+  // para que isso não aconteça, usa-se o ??.
+
+  // ou seja, se o valor da esquerda for false, null ou undefined
+  // ele atribui o valor da direita (nesse caso, na primeira passada)
+
+  // na segunda passa, o valor da esquerda nao é mais falso ou undefined
+  // e dessa forma pode-se usar a condição
+
+  const cartPreviousValue = prevCartRef.current ?? cart
+
+  useEffect(() => {
+    // se cartPreviousValue for diferente de cart significa que teve uma alteração no carrinho
+    // e assim o useEffect atualiza o estado
+    if (cartPreviousValue !== cart) {
+      localStorage.setItem('@RocketShoes:cart', JSON.stringify(cart));
+    }
+  }, [cart, cartPreviousValue])
 
   const addProduct = async (productId: number) => {
     try {
@@ -67,7 +95,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         updatedCart.push(newProduct);
       }
       setCart(updatedCart);
-      localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
     } catch {
       toast.error('Erro na adição de produto');
     }
@@ -89,7 +116,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         // mantendo o princio de imutabilidade <3
         updatedCart.splice(productIndex, 1);
         setCart(updatedCart);
-        localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
       } else {
         //força o erro pra cair no catch
         throw Error();
@@ -128,7 +154,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       if (productExists) {
         productExists.amount = amount;
         setCart(updatedCart);
-        localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
       } else {
         throw Error();
       }
