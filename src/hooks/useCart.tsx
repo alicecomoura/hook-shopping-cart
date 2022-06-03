@@ -71,15 +71,34 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
       localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
 
     } catch {
-      toast.error('Erro na adição de produto')
+      toast.error('Erro na adição de produto');
     }
   };
 
   const removeProduct = (productId: number) => {
     try {
-      // TODO
+      const updatedCart = [...cart];
+
+      // para a remoção do produto precisa verificar se existe no carrinho do
+      // é preciso utiliza o findIndex para mais tarde poder usar o splice para 
+      // pode remover do array
+      const productIndex = updatedCart.findIndex(product => product.id === productId);
+
+      // se o findIndex não encontra retorna -1 
+      // se ele encontrou significa que o productIndex é maior ou igual a 0
+      if (productIndex >= 0) {
+        // começa a apagar do index que encontro, no caso o productIndex e apaga 1 produto
+        // mantendo o princio de imutabilidade <3
+        updatedCart.splice(productIndex, 1);
+        setCart(updatedCart);
+        localStorage.setItem('@RocketShoes:cart', JSON.stringify(updatedCart));
+      } else {
+        //força o erro pra cair no catch
+        throw Error();
+      }
+
     } catch {
-      // TODO
+      toast.error('Erro na remoção do produto');
     }
   };
 
